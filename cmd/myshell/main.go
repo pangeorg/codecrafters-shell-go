@@ -4,9 +4,22 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
-	fmt.Fprint(os.Stdout, "$ ")
-	bufio.NewReader(os.Stdin).ReadString('\n')
+	for {
+		fmt.Fprint(os.Stdout, "$ ")
+		var command, err = bufio.NewReader(os.Stdin).ReadString('\n')
+		if err != nil {
+			os.Stderr.WriteString("reading command")
+			continue
+		}
+		command = strings.Replace(command, "\n", "", -1)
+		switch command {
+		default:
+			var formatted = fmt.Sprintf("%s: command not found\n", command)
+			fmt.Fprint(os.Stdout, formatted)
+		}
+	}
 }
