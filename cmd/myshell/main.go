@@ -9,15 +9,16 @@ import (
 	"strings"
 )
 
-type Command int
+type Command string
 
 const (
-	exit Command = iota
-	echo
-	unknown
+	exit         Command = "exit"
+	echo                 = "echo"
+	type_builtin         = "type"
+	unknown              = "unknown"
 )
 
-var command_map map[Command]string = map[Command]string{exit: "^(exit)\\s.*\\d", echo: "^(echo).*"}
+var command_map map[Command]string = map[Command]string{exit: "^(exit)\\s.*\\d", echo: "^(echo).*", type_builtin: "^(type).*"}
 
 func determine_command(input string) Command {
 	var match bool
@@ -29,6 +30,19 @@ func determine_command(input string) Command {
 		}
 	}
 	return unknown
+}
+
+func handle_type(input string) {
+	var split = strings.Split(input, " ")
+	var type_to_check = split[1]
+	if _, ok := command_map[Command(type_to_check)]; ok {
+		var formatted = fmt.Sprintf("%s is a shell builtin\n", type_to_check)
+		fmt.Fprint(os.Stdout, formatted)
+		return
+	}
+	var formatted = fmt.Sprintf("%s: not found\n", type_to_check)
+	fmt.Fprint(os.Stdout, formatted)
+	return
 }
 
 func handle_exit(input string) {
@@ -69,6 +83,8 @@ func main() {
 			handle_exit(input)
 		case echo:
 			handle_echo(input)
+		case type_builtin:
+			handle_type(input)
 		default:
 			var formatted = fmt.Sprintf("%s: command not found\n", input)
 			fmt.Fprint(os.Stdout, formatted)
