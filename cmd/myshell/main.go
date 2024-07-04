@@ -78,20 +78,20 @@ func handle_type(args []string) {
 		return
 	}
 
-	_, err = parse_builtin(args[1])
+	_, err = parse_builtin(args[0])
 	if err == nil {
-		var formatted = fmt.Sprintf("%s is a shell builtin\n", args[1])
+		var formatted = fmt.Sprintf("%s is a shell builtin\n", args[0])
 		fmt.Fprint(os.Stdout, formatted)
 		return
 	}
 
-	exe, err = find_executable(args[1])
+	exe, err = find_executable(args[0])
 	if err == nil {
-		var formatted = fmt.Sprintf("%s is a %s\n", args[1], exe)
+		var formatted = fmt.Sprintf("%s is a %s\n", args[0], exe)
 		fmt.Fprint(os.Stdout, formatted)
 		return
 	}
-	exe = fmt.Sprintf("%s: not found\n", args[1])
+	exe = fmt.Sprintf("%s: not found\n", args[0])
 	fmt.Fprint(os.Stdout, exe)
 }
 
