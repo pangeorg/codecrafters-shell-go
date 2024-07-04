@@ -17,6 +17,7 @@ const (
 	exit         Builtin = "exit"
 	echo                 = "echo"
 	type_builtin         = "type"
+	pwd                  = "pwd"
 	unknown              = "unknown"
 )
 
@@ -39,6 +40,8 @@ func parse_builtin(exe string) (Builtin, error) {
 		return echo, nil
 	case string(type_builtin):
 		return type_builtin, nil
+	case string(pwd):
+		return pwd, nil
 	}
 	return unknown, errors.New("Not a builtin")
 }
@@ -64,9 +67,19 @@ func handle_builtin(builtin Builtin, args []string) {
 		handle_echo(args)
 	case type_builtin:
 		handle_type(args)
+	case pwd:
+		handle_pwd()
 	default:
 		return
 	}
+}
+
+func handle_pwd() {
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(dir)
 }
 
 func handle_type(args []string) {
