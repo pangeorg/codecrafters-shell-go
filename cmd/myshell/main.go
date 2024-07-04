@@ -18,19 +18,9 @@ const (
 	echo                 = "echo"
 	type_builtin         = "type"
 	pwd                  = "pwd"
+	cd                   = "cd"
 	unknown              = "unknown"
 )
-
-func handle_external(exe string, args []string) {
-	cmd_args := append([]string{filepath.Base(exe)}, args...)
-	cmd := exec.Command(exe, cmd_args[1:]...)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
-	if err != nil {
-		fmt.Printf("%s: command not found: %s\n", exe, err)
-	}
-}
 
 func parse_builtin(exe string) (Builtin, error) {
 	switch exe {
@@ -42,8 +32,21 @@ func parse_builtin(exe string) (Builtin, error) {
 		return type_builtin, nil
 	case string(pwd):
 		return pwd, nil
+	case string(cd):
+		return cd, nil
 	}
 	return unknown, errors.New("Not a builtin")
+}
+
+func handle_external(exe string, args []string) {
+	cmd_args := append([]string{filepath.Base(exe)}, args...)
+	cmd := exec.Command(exe, cmd_args[1:]...)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("%s: command not found: %s\n", exe, err)
+	}
 }
 
 func find_executable(exe string) (string, error) {
@@ -69,8 +72,17 @@ func handle_builtin(builtin Builtin, args []string) {
 		handle_type(args)
 	case pwd:
 		handle_pwd()
+	case cd:
+		handle_cd(args)
 	default:
 		return
+	}
+}
+
+func handle_cd(args []string) {
+	err := os.Chdir(args[0])
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "cd: %s: No such file or directory", args[0])
 	}
 }
 
@@ -93,27 +105,23 @@ func handle_type(args []string) {
 
 	_, err = parse_builtin(args[0])
 	if err == nil {
-		var formatted = fmt.Sprintf("%s is a shell builtin\n", args[0])
-		fmt.Fprint(os.Stdout, formatted)
+		fmt.Fprintf(os.Stdout, "%s is a shell builtin\n", args[0])
 		return
 	}
 
 	exe, err = find_executable(args[0])
 	if err == nil {
-		var formatted = fmt.Sprintf("%s is %s\n", args[0], exe)
-		fmt.Fprint(os.Stdout, formatted)
+		fmt.Fprintf(os.Stdout, "%s is %s\n", args[0], exe)
 		return
 	}
-	exe = fmt.Sprintf("%s: not found\n", args[0])
-	fmt.Fprint(os.Stdout, exe)
+	fmt.Fprintf(os.Stdout, "%s: not found\n", args[0])
 }
 
 func handle_exit(args []string) {
 	var exit_code int
 	var err error
 	if len(args) > 1 {
-		var formatted = fmt.Sprintf("Input not understood: exit '%s'\n", args)
-		fmt.Fprint(os.Stdout, formatted)
+		fmt.Fprintf(os.Stdout, "Input not understood: exit '%s'\n", args)
 		return
 	}
 	if len(args) == 0 {
@@ -121,8 +129,7 @@ func handle_exit(args []string) {
 	} else {
 		exit_code, err = strconv.Atoi(args[0])
 		if err != nil {
-			var formatted = fmt.Sprintf("Input not understood: exit '%s'\n", args)
-			fmt.Fprint(os.Stdout, formatted)
+			fmt.Fprintf(os.Stdout, "Input not understood: exit '%s'\n", args)
 			return
 		}
 	}
@@ -173,7 +180,6 @@ func main() {
 			handle_external(exe, args)
 			continue
 		}
-		var formatted = fmt.Sprintf("%s: command not found\n", input)
-		fmt.Fprint(os.Stdout, formatted)
+		fmt.Fprintf(os.Stdout, "%s: command not found\n", input)
 	}
 }
