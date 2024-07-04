@@ -87,7 +87,7 @@ func handle_type(args []string) {
 
 	exe, err = find_executable(args[0])
 	if err == nil {
-		var formatted = fmt.Sprintf("%s is a %s\n", args[0], exe)
+		var formatted = fmt.Sprintf("%s is %s\n", args[0], exe)
 		fmt.Fprint(os.Stdout, formatted)
 		return
 	}
