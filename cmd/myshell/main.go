@@ -82,7 +82,7 @@ func handle_builtin(builtin Builtin, args []string) {
 func handle_cd(args []string) {
 	err := os.Chdir(args[0])
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "cd: %s: No such file or directory", args[0])
+		fmt.Fprintf(os.Stdout, "cd: %s: No such file or directory\n", args[0])
 	}
 }
 
