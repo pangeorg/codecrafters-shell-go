@@ -80,7 +80,13 @@ func handle_builtin(builtin Builtin, args []string) {
 }
 
 func handle_cd(args []string) {
-	err := os.Chdir(args[0])
+	path := args[0]
+	if path == "~" {
+		path = os.Getenv("HOME")
+	} else if strings.HasPrefix(path, "~/") {
+		path = filepath.Join(os.Getenv("HOME"), path[2:])
+	}
+	err := os.Chdir(path)
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "cd: %s: No such file or directory\n", args[0])
 	}
